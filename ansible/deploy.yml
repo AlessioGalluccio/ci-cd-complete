@@ -1,0 +1,32 @@
+- hosts: flaskservers
+  remote_user: root
+  become: yes
+  tasks:
+    - name: Pull latest code
+      git:
+        repo: 'https://github.com/AlessioGalluccio/ci-cd-complete.git'
+        dest: /home/ubuntu/flask-app
+        version: main
+        force: yes
+
+    - name: Build docker image
+      community.docker.docker_image:
+        source: build
+        build:
+          path: /home/ubuntu/flask-app
+        name: flask-app
+        tag: latest
+
+    - name: Stop existing container
+      community.docker.docker_container:
+        name: flask-app-container
+        state: absent
+        force_kill: yes
+
+    - name: Run container
+      community.docker.docker_container:
+        name: flask-app-container
+        image: flask-app:latest
+        state: started
+        ports:
+          - "5000:5000"
