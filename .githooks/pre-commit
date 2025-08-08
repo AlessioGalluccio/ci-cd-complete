@@ -1,0 +1,13 @@
+#!/bin/sh
+
+echo "Running tests inside Docker..."
+
+docker run --rm flask-app sh -c "pytest || { echo 'Tests failed! Commit aborted.'; exit 1; }"
+
+if [ $? -ne 0 ]; then
+  echo "Commit aborted due to failed tests."
+  exit 1
+fi
+
+echo "Tests passed. Proceeding with commit."
+exit 0
